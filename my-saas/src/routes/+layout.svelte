@@ -1,12 +1,12 @@
 <script>
-	import Header from './Header.svelte';
+	import Header1 from './Header1.svelte';
 	import '../app.css';
 	
 	let { children } = $props();
 </script>
 
 <div class="app">
-	<!-- <Header1></Header1> -->
+	<Header1></Header1>
     <!-- <Header></Header> -->
 
 	<main>
