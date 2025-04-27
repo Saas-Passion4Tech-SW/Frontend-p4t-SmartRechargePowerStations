@@ -120,6 +120,80 @@
     </div>
   {/if}
 </div>
+<div style="text-align: center;">
+  <p>***************************</p>
+  <p>parte custom backend</p>
+  <p>***************************</p>
+</div>
+
+<div class="stations-container bg-green-100">
+  <h1>Stations de recharge</h1>
+
+  <div class="search-filters">
+    <input
+      type="text"
+      bind:value={searchQuery}
+      placeholder="Rechercher une station..."
+    />
+
+    <div class="filters">
+      <label>
+        <input type="checkbox" bind:checked={filters.available} />
+        Disponibles uniquement
+      </label>
+
+      <label>
+        <input type="checkbox" bind:checked={filters.fastCharging} />
+        Recharge rapide
+      </label>
+
+      <div class="distance-filter">
+        <span>Distance max: {filters.maxDistance}km</span>
+        <input
+          type="range"
+          min="5"
+          max="100"
+          step="5"
+          bind:value={filters.maxDistance}
+        />
+      </div>
+    </div>
+  </div>
+
+  {#if isLoading}
+    <p>Chargement des stations...</p>
+  {:else if error}
+    <p class="error">Erreur: {error}</p>
+  {:else if filteredStations.length === 0}
+    <p>Aucune station ne correspond à vos critères.</p>
+  {:else}
+    <div class="stations-grid">
+      {#each filteredStations as station}
+        <div
+          class="station-card"
+          class:available={station.isAvailable}
+        >
+          <h3>{station.name}</h3>
+          <p class="address">{station.address}</p>
+          <div class="station-info">
+            <span class="status {station.isAvailable ? 'available' : 'busy'}">
+              {station.isAvailable ? 'Disponible' : 'Occupée'}
+            </span>
+            <span class="distance">{station.distance}km</span>
+          </div>
+          <div class="chargers">
+            {#each station.connectors as connector}
+              <div class="connector-type">
+                <span class="type">{connector.type}</span>
+                <span class="power">{connector.power}kW</span>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
+</div>
 
 <style>
   .stations-container {
