@@ -9,6 +9,6 @@ export default defineConfig({
 	},
 	server: {
 	    host: '0.0.0.0',
-	    port: 1809,
+	    port: 1810,
 	}
 });

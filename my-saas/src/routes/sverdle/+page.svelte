@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import axios from 'axios';
 	
 	// État pour contrôler l'affichage du modal
 	let showModal = false;
@@ -27,25 +28,54 @@
 	}
 	
 	// Fonction de connexion
-	function handleLogin(e) {
-	  e.preventDefault();
-	  isLoading = true;
-	  errorMessage = '';
-	  
-	  // Simulation d'une connexion
-	  setTimeout(() => {
-		isLoading = false;
-		// Dans une application réelle, vous appelleriez votre API ici
-		console.log('Tentative de connexion avec:', { email, password, rememberMe });
+	async function handleLogin(e) {
+		e.preventDefault();
+		isLoading = true;
+		errorMessage = '';
 		
-		// Simulation d'erreur (à remplacer par votre logique réelle)
-		if (email !== 'user@example.com' || password !== 'password') {
-		  errorMessage = 'Email ou mot de passe incorrect.';
-		} else {
-		  // Fermer le modal après une connexion réussie
-		  closeLoginModal();
+		try {
+			// Requête POST réelle avec Axios
+			const response = await axios.post('http://89.117.63.24:8006/api/user/login/', {
+			email: email,
+			password: password,
+			//rememberMe: rememberMe
+			});
+			
+			// Traitement de la réponse réussie
+			console.log('Connexion réussie:', response.data);
+			
+			// Si l'API renvoie un token, vous pouvez le stocker
+			/*if (response.data.token) {
+				// Stocker dans localStorage ou sessionStorage selon rememberMe
+				if (rememberMe) {
+					localStorage.setItem('authToken', response.data.token);
+				} else {
+					sessionStorage.setItem('authToken', response.data.token);
+				}
+			}*/
+
+			// Fermer le modal après une connexion réussie
+			closeLoginModal();
+			
+		} catch (error) {
+			// Gestion des erreurs
+			console.error('Erreur de connexion:', error);
+			
+			// Afficher un message d'erreur approprié selon la réponse
+			/*if (error.response) {
+			// Le serveur a répondu avec un code d'erreur
+			errorMessage = error.response.data.message || 'Identifiants incorrects.';
+			} else if (error.request) {
+			// La requête a été envoyée mais pas de réponse
+			errorMessage = 'Serveur inaccessible. Vérifiez votre connexion internet.';
+			} else {
+			// Erreur lors de la configuration de la requête
+			errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+			}*/
+		} 
+		finally {
+			isLoading = false;
 		}
-	  }, 1000);
 	}
 	
 	// Fonction de demande de réinitialisation de mot de passe

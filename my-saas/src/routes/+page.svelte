@@ -1,6 +1,7 @@
 <script>
 	// @ts-ignore
 	import { onMount } from 'svelte';
+	import axios from 'axios';
   
 	// Liste des applications
 	const applications = [
@@ -54,12 +55,14 @@
 
 	// États du formulaire
 	let email = '';
+	let username = '';
 	let password = '';
 	let rememberMe = false;
 	let currentView = 'login'; // 'login', 'reset', ou 'resetSent'
 	let resetEmail = '';
 	let errorMessage = '';
 	let isLoading = false;
+	let showModal = true;
 
 	// Fonction pour fermer le modal
 	function closeLoginModal() {
@@ -67,26 +70,30 @@
 	}
 
 	// Fonction de connexion
-	function handleLogin(e) {
+	async function handleLogin(e) {
 	  e.preventDefault();
 	  isLoading = true;
 	  errorMessage = '';
 	  
+	  console.log('response555555555111');
+      console.log(username);
+	  console.log(password);
+      console.log('response555555555555111');
 	  // Simulation d'une connexion
-	  setTimeout(() => {
-		isLoading = false;
-		// Dans une application réelle, vous appelleriez votre API ici
-		console.log('Tentative de connexion avec:', { email, password, rememberMe });
-		errorMessage = 'Email ou mot de passe incorrect.000000';
-		
-		// Simulation d'erreur (à remplacer par votre logique réelle)
-		if (email !== 'user@example.com' || password !== 'password') {
-		  errorMessage = 'Email ou mot de passe incorrect.';
-		} else {
-		  // Fermer le modal après une connexion réussie
-		  closeLoginModal();
-		}
-	  }, 1000);
+	  axios.post('http://89.117.63.24:8006/api/user/login/', 
+            {
+                username: username,
+                password: password
+            }
+        )
+        .then(function (response) {
+            console.log('response555555555');
+            console.log(response.data)
+            console.log('response555555555555');
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 	}
   </script>
   
@@ -127,14 +134,14 @@
 			<div class="form-group">
 			  <label for="email">Adresse e-mail</label>
 			  <input 
-				type="email" 
-				id="email" 
-				bind:value={email} 
+				type="text" 
+				id="username" 
+				bind:value={username} 
 				required 
-				placeholder="nom@exemple.com"
-				autocomplete="email"
-			  />
-			</div>
+				placeholder="Nom d'utilisateur" 
+				autocomplete="username" 
+				/>
+
 			
 			<div class="form-group">
 			  <label for="password">Mot de passe</label>

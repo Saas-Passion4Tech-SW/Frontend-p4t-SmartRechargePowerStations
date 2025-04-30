@@ -1,0 +1,20 @@
+services:
+  smartrecharge_p4t_app_front:
+    container_name: "smartrecharge_p4t_app_front"
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: my_image
+
+    ports:
+      - "2901:1810"
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    #command: ./start.sh
+
+    environment:
+      - NODE_ENV=development
