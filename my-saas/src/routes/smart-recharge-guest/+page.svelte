@@ -2,7 +2,6 @@
 	// @ts-ignore
 	import { onMount } from 'svelte';
 	import axios from 'axios';
-	import { goto } from '$app/navigation';
   
 	// Liste des applications
 	const applications = [
@@ -35,15 +34,7 @@
 		details: "FitTracker enregistre vos activités sportives, votre alimentation et votre sommeil pour vous aider à atteindre vos objectifs de santé. Visualisez vos progrès et recevez des conseils personnalisés."
 	  }
 	];
-	
-	//const currentUrl = window.location.href;
-	let currentUrl;
-
-	onMount(() => {
-		currentUrl = window.location.href;
-		console.log("URL actuelle :", currentUrl);
-	});
-
+  
 	// État pour le modal
 	let modalVisible = false;
 	let selectedApp = "";
@@ -107,14 +98,13 @@
 			localStorage.setItem('access_token', token);
 
 			if (response.data.role == 'Admin' || response.data.role == 'Network manager') {
-				//window.location.href = currentUrl+'smart-recharge-network';
-				goto(currentUrl+'smart-recharge-network');
+				const currentUrl = window.location.href;
+				window.location.href = currentUrl+'smart-recharge-network';
 			} else if (response.data.role == 'Station manager') {
-				//window.location.href = currentUrl+'smart-recharge-station';
-				goto(currentUrl+'smart-recharge-station');
+				const currentUrl = window.location.href;
+				window.location.href = currentUrl+'smart-recharge-station';
 			} else {
-				//window.location.href = currentUrl+'smart-recharge-guest';
-				goto(currentUrl+'smart-recharge-guest');
+				window.location.href = currentUrl;
 			}
 			
         })

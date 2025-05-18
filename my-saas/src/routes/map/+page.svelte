@@ -6,6 +6,11 @@
   import FilterPanel from '$lib/components/FilterPanel.svelte';
   import { goto } from '$app/navigation';
   import { userPosition } from '$lib/stores/locationStore';
+  import { stations_for_maps } from '../../variable-store';
+
+  console.log("121jnjn99999");
+  console.log($stations_for_maps);
+  console.log("---------------");
 
   let mapContainer;
   let map;
@@ -41,7 +46,7 @@
         stations = await fetchAllStations();
 
         // Initialiser la carte
-        map = L.map(mapContainer).setView([48.8566, 2.3522], 12);
+        map = L.map(mapContainer).setView([3.848, 11.502], 6);
 
         // Ajout des tuiles OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

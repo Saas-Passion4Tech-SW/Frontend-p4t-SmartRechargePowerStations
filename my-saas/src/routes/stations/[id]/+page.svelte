@@ -1,34 +1,50 @@
 <script>
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { fetchStationDetails } from '$lib/services/stationService';
-  //import { userStore } from '$lib/stores/userStore';
+	import axios from 'axios';
+	import Accordion from '../../components/Accordion.svelte';
+  import Map from '../../components/Map.svelte';
+
+	import { station } from '../../../variable-store';
 
   const stationId = $page.params.id;
+  console.log("jwejde000111");
+  console.log(stationId);
 
-  let station = null;
-  let isLoading = true;
+  onMount(async () => {
+		const token = localStorage.getItem('access_token');
+		try {
+			const response = await axios.get('http://89.117.63.24:8005/api/smartrecharge/staz/'+stationId+'/', {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			station.set(response.data.station); // accessible partout dans le script après
+			console.log('Données récupérées :', response.data);
+
+      console.log("Station ID:", stationId);
+      console.log("Réponse brute API :", response.data);
+      console.log("Réponse brute API111 :", $station);
+
+		} catch (err) {
+			console.error("Erreur d'authentification", err);
+		}
+	});
+
+  console.log("jwejde0004");
+  console.log($station);
+
+  //let station = null;
+  let isLoading = false;
   let error = null;
   let selectedConnector = null;
   let showReservationModal = false;
 
-  onMount(async () => {
-    try {
-      station = await fetchStationDetails(stationId);
-      // Si la station a des connecteurs, sélectionner le premier par défaut
-      if (station.connectors && station.connectors.length > 0) {
-        selectedConnector = station.connectors[0];
-      }
-    } catch (err) {
-      error = err.message;
-    } finally {
-      isLoading = false;
-    }
-  });
 
   function toggleFavorite() {
     // Logique pour ajouter/retirer des favoris
-    station.isFavorite = !station.isFavorite;
+    //station.isFavorite = !station.isFavorite;
     // Appel API pour mettre à jour le statut favori
   }
 
@@ -39,7 +55,7 @@
 </script>
 
 <svelte:head>
-  <title>{station ? station.name : 'Détails de la station'}</title>
+  <title>{$station ? $station.name : 'Détails de la station'}</title>
 </svelte:head>
 
 {#if isLoading}
@@ -51,7 +67,7 @@
     <p>Erreur: {error}</p>
     <button on:click={() => history.back()}>Retourner aux stations</button>
   </div>
-{:else if station}
+{:else if $station}
   <div class="station-details bg-green-100">
     <div class="header">
       <!--<div class="back-button" on:click={() => history.back()}>
@@ -59,14 +75,14 @@
       </div> -->
 
       <div class="title-section">
-        <h1>{station.name}</h1>
+        <h1>{$station.name}</h1>
         <button class="favorite-btn" on:click={toggleFavorite}>
           {station.isFavorite ? '★ Favori' : '☆ Ajouter aux favoris'}
         </button>
       </div>
 
       <div class="address">
-        <p>{station.address}</p>
+        <p>Adresse: {$station.address}, {$station.city}</p>
         <button class="directions-btn">
           Itinéraire
         </button>
@@ -80,45 +96,55 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="label">Status:</span>
-              <span class="value status {station.isAvailable ? 'available' : 'busy'}">
-                {station.isAvailable ? 'Disponible' : 'Occupée'}
+              <span class="value status {$station.isAccessible ? 'available' : 'busy'}">
+                {$station.isAccessible ? 'Disponible' : 'Occupée'}
               </span>
             </div>
             <div class="info-item">
               <span class="label">Horaires:</span>
-              <span class="value">{station.openingHours || '24h/24'}</span>
+              <span class="value">{$station.openingHours || '24h/24'}</span>
             </div>
             <div class="info-item">
               <span class="label">Parking:</span>
-              <span class="value">{station.hasParkingFee ? 'Payant' : 'Gratuit'}</span>
+              <span class="value">{$station.hasParkingFee ? 'Payant' : 'Gratuit'}</span>
             </div>
             <div class="info-item">
               <span class="label">Accessibilité:</span>
-              <span class="value">{station.isAccessible ? 'Accessible PMR' : 'Non accessible'}</span>
+              <span class="value">{$station.isAccessible ? 'Accessible PMR' : 'Non accessible'}</span>
             </div>
-            <div class="info-item">
-              <span class="label">Opérateur:</span>
-              <span class="value">{station.operator}</span>
-            </div>
+            <!-- <div class="info-item">
+              <span class="label">Opérateur: <b>{$station.networks_str}</b></span>
+            </div> -->
+          </div>
+          <br />
+          <div class="info-item">
+            <span class="label">Opérateur: <b>{$station.networks_str}</b></span>
           </div>
         </div>
 
         <div class="connectors-box">
-          <h2>Points de charge</h2>
+          <h2><b>Bornes de recharge</b></h2>
+          <br/>
           <div class="connectors-list">
-            {#each station.connectors as connector}
+            {#each $station.terminals as terminal}
               <!-- <div
-                class="connector-item"
-                class:selected={selectedConnector === connector}
-                on:click={() => selectedConnector = connector}
+                class="terminal-item"
+                class:selected={selectedConnector === terminal}
+                on:click={() => selectedConnector = terminal}
               > -->
-                <div class="connector-header">
-                  <span class="connector-type">{connector.type}</span>
-                  <span class="connector-power">{connector.power}kW</span>
+                <div class="terminal-header">
+                  <span class="connector-type">Terminal <b>{terminal.Tcode}</b></span>
+                  <span class="connector-power">puissance: <b>{terminal.power} kW</b></span>
+                  {#each terminal.connectors as connector}
+                    <li>
+                      connecteur de type {connector.type.type} is <b>{connector.status}</b>
+                    </li>
+                  {/each}
+                  <br />
                 </div>
-                <div class="connector-status {connector.isAvailable ? 'available' : 'busy'}">
-                  {connector.isAvailable ? 'Disponible' : 'Occupé'}
-                </div>
+                <!-- <div class="terminal-status {terminal.isAvailable ? 'available' : 'busy'}">
+                  {terminal.isAvailable ? 'Disponible' : 'Occupé'}
+                </div> -->
               <!-- </div> -->
             {/each}
           </div>
@@ -145,18 +171,12 @@
       </div>
 
       <div class="right-column">
-        <div class="map-container">
-          <!-- Ici, intégrez une carte montrant l'emplacement de la station -->
-          <div class="map-placeholder">
-            Carte de la station
-          </div>
-        </div>
-
+        
         <div class="reviews-box">
-          <h2>Avis ({station.reviews ? station.reviews.length : 0})</h2>
-          {#if station.reviews && station.reviews.length > 0}
+          <h2>Avis ({$station.reviews ? $station.reviews.length/2 : 0})</h2>
+          {#if $station.reviews && $station.reviews.length > 0}
             <div class="reviews-list">
-              {#each station.reviews.slice(0, 3) as review}
+              {#each $station.reviews.slice(0, $station.reviews.length/2) as review}
                 <div class="review-item">
                   <div class="review-header">
                     <span class="review-author">{review.author}</span>
@@ -167,9 +187,7 @@
                   <p class="review-content">{review.content}</p>
                 </div>
               {/each}
-              {#if station.reviews.length > 3}
-                <button class="view-all-btn">Voir tous les avis</button>
-              {/if}
+              
             </div>
           {:else}
             <p>Aucun avis pour le moment.</p>

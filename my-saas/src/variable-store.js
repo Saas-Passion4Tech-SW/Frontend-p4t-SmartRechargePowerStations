@@ -1,109 +1,11 @@
 import {writable} from 'svelte/store'
 
-export const FilmStore = writable([])
+export const Networks = writable([]);
 
-export const data_from_cache = writable([])
+export const Stations_by_Networks = writable([]);
 
-export const AllFilms = writable([])
+export const all_datas = writable([]);
 
-export const GotFilm = writable([])
+export const station = writable(null);
 
-export const FilmAR = writable([])
-
-export const CarousselImages = writable([])
-
-export const trafficHomepage = writable([])
-
-export const fid = writable([])
-
-export const Candidats = writable([])
-
-export const StatsCandidats = writable([])
-
-export const Data_Viz_Candidats = writable([])
-
-export const WinnerCandidate = writable([])
-
-export const Projects = writable([])
-
-export const Tasksbyproject = writable([])
-
-export const proj_dropdown = writable([])
-
-export const Meetingbyproject = writable([])
-
-export const beginner = writable([
-    '1. To-Do List Application',
-    '2. Weather App',
-    '3. Calculator',
-    '4. Currency Converter',
-    '5. Notes App',
-    '6. Personal Blog',
-    '7. Quiz App',
-    '8. Expense Tracker',
-    '9. Unit Converter',
-    '10. Recipe App',
-    '11. Simple Blogging Platform',
-    '12. Basic Contact Form',
-    '13. Digital Clock',
-    '14. BMI Calculator',
-    '15. Random Quote Generator',
-    '16. Simple Survey Form',
-    '17. Tip Calculator',
-    '18. Color Picker Tool',
-    '19. Simple Reminder App',
-    '20. Flashcard Study App',
-    '21. Basic Photo Gallery',
-    '22. Markdown Previewer',
-    '23. Temperature Converter',
-    '24. URL Shortener',
-    '25. Interest Calculator',
-    '26. To-Do List with Local Storage',
-    '27. Language Learning App',
-    '28. Simple Chatbot',
-    '29. Random Number Generator',
-    '30. Basic Expense Tracker'
-])
-
-export const intermediate = writable([
-    '31. Chat Application',
-    '32. E-commerce Website',
-    '33. Task Management System',
-    '34. Event Management System',
-    '35. Movie Recommendation System',
-    '36. Blogging Platform',
-    '37. Social Media Dashboard',
-    '38. Online Voting System',
-    '39. Library Management System',
-    '40. Portfolio Website',
-    '41. Restaurant Reservation System',
-    '42. Online Forum',
-    '43. Fitness Tracker',
-    '44. Content Management System (CMS)',
-    '45. Job Board'
-])
-
-export const advanced = writable([
-    '46. Real-Time Collaboration Tool',
-    '47. Machine Learning-Based Chatbot',
-    '48. Image Recognition System',
-    '49. Blockchain-Based Voting System',
-    '50. IoT Home Automation System',
-    '51. Advanced E-commerce Platform',
-    '52. Augmented Reality App',
-    '53. Personal Finance Manager',
-    '54. Natural Language Processing (NLP) Tool',
-    '55. Custom Operating System',
-    '56. Healthcare Management System',
-    '57. AI-Powered Personal Assistant',
-    '58. Real-Time Stock Market Analysis Tool',
-    '59. Virtual Reality Game',
-    '60. Autonomous Drone Control System',
-    '61. Smart Inventory Management System',
-    '62. Speech Recognition System',
-    '63. Cybersecurity Monitoring Tool',
-    '64. Real-Time Language Translation App',
-    '65. Advanced Analytics Platform',
-    '66. Automated Trading System',
-    '67. Smart Home Security System'
-])
+export const stations_for_maps = writable([]);

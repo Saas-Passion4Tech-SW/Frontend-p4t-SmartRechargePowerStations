@@ -6,6 +6,50 @@
   import UpcomingReservations from './UpcomingReservations.svelte';
   import UsageStats from './UsageStats.svelte';
   import NearbyStations from './NearbyStations.svelte';
+  import axios from 'axios';
+
+  let error = '';
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+      return parts.pop().split(';').shift();
+    }
+  }
+
+  async function testapiwithcrf() {
+    const token = getCookie('code-server-session');
+    console.log('Token depuis le cookie :', token);
+    await axios.get('http://89.117.63.24:8006/api/smartrecharge/is-authenticated/', {
+        //withCredentials: true  // Enverra automatiquement le cookie
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+    }).then(response => {
+      console.log('Utilisateur authentifiérger666666666', response.data);
+    }).catch(err => {
+      console.error('Erreur d\'authentification', err);
+    });
+  }
+
+  onMount(async () => {
+    testapiwithcrf()
+    console.log("========")
+    const token = localStorage.getItem('access_token');
+    console.log("jdjwefjew");
+    console.log(token);
+    console.log("dfjjeer");
+    axios.get('http://89.117.63.24:8006/api/smartrecharge/is-authenticated/', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(response => {
+      console.log('Utilisateur authentifié999', response.data);
+    }).catch(err => {
+      console.error('Erreur d\'authentification', err);
+    });
+  });
 
   let userData = {
     name: 'Thomas Dubois',
@@ -65,6 +109,8 @@
     // Simuler un délai d'API
     await new Promise(resolve => setTimeout(resolve, 500));
   }
+
+
 </script>
 
 <svelte:head>
