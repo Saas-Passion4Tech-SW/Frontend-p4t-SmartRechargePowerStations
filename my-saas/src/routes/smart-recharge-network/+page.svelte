@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import StationGrid from '../components/StationGrid.svelte';
+	import TabsFetch from '../components/TabsFetch.svelte';
 	import { goto } from '$app/navigation';
 	
 	import { Networks, all_datas, stations_for_maps } from '../../variable-store';
@@ -59,9 +60,11 @@
 		// Réactif : met à jour filteredData quand selectedKey ou $all_datas change
 		$: filteredData = $all_datas[selectedAppName] || [];
 		//alert(filteredData);
-		console.log("=====");
+		console.log("===++++==");
 		console.log(filteredData);
-		console.log("******")
+		console.log("***+++***")
+		console.log($all_datas);
+		console.log("***+++**????*")
 		showDetailsSection = true;
 	}
 
@@ -100,6 +103,7 @@
 	<button class="mt-4 bg-green-500 text-white px-4 py-2 rounded" on:click={set_stations_for_maps}>
 		Fermer
 	</button>
+	<TabsFetch />
 
   
 
