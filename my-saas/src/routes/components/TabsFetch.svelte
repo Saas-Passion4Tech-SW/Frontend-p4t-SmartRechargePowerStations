@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import StationGrid1 from './StationGrid1.svelte';
+  import ChargingStationCard2 from './ChargingStationCard2.svelte';
   export let nets;
 
   let data = [];
@@ -97,7 +98,7 @@
 {:else if error}
   <p style="color: red;">Erreur : {error}</p>
 {:else if data.length > 0}
-  <StationGrid1 stations={data}/>
+  <ChargingStationCard2 stations={data}/>
 {:else}
   <p>Aucune donnée à afficher.</p>
 {/if}

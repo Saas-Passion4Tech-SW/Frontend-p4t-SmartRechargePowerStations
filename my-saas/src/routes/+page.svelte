@@ -4,38 +4,6 @@
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
 	import AppList from './components/AppList.svelte';
-  
-	// Liste des applications
-	const applications = [
-	  {
-		id: 1,
-		nom: "PhotoEditor Pro",
-		description: "Éditeur de photos professionnel avec de nombreux filtres et outils",
-		image: "/api/placeholder/200/200",
-		details: "PhotoEditor Pro est une application complète d'édition d'images offrant des outils avancés tels que le réglage des couleurs, la retouche faciale, les filtres artistiques et bien plus encore. Parfaite pour les photographes amateurs et professionnels."
-	  },
-	  {
-		id: 2,
-		nom: "TaskMaster",
-		description: "Application de gestion de tâches et de productivité",
-		image: "/api/placeholder/200/200",
-		details: "TaskMaster vous aide à organiser votre vie quotidienne avec des listes de tâches, des rappels, et des statistiques de productivité. Synchronisez vos données sur tous vos appareils et restez organisé."
-	  },
-	  {
-		id: 3,
-		nom: "MusicStream",
-		description: "Service de streaming musical avec millions de titres",
-		image: "/api/placeholder/200/200",
-		details: "MusicStream vous donne accès à une bibliothèque de millions de chansons, podcasts et playlists. Profitez de recommandations personnalisées et découvrez de nouveaux artistes adaptés à vos goûts musicaux."
-	  },
-	  {
-		id: 4,
-		nom: "FitTracker",
-		description: "Application de suivi fitness et santé",
-		image: "/api/placeholder/200/200",
-		details: "FitTracker enregistre vos activités sportives, votre alimentation et votre sommeil pour vous aider à atteindre vos objectifs de santé. Visualisez vos progrès et recevez des conseils personnalisés."
-	  }
-	];
 
 	// Exemple de liste d'applications
 	let apps = [
@@ -56,6 +24,19 @@
 		},
 	];
 	
+	let modalVisible = false;
+	let selectedApp = null;
+
+	function openModal(app) {
+		alert(app.title);
+		selectedApp = app.title;
+		modalVisible = true;
+	}
+
+	function closeModal() {
+		modalVisible = false;
+  	}
+
 	//const currentUrl = window.location.href;
 	let currentUrl;
 
@@ -63,24 +44,6 @@
 		currentUrl = window.location.href;
 		console.log("URL actuelle :", currentUrl);
 	});
-
-	// État pour le modal
-	let modalVisible = false;
-	let selectedApp = "";
-	// @ts-ignore
-	let app = "";
-  
-	// Fonction pour ouvrir le modal
-	// @ts-ignore
-	function openModal(app) {
-	  selectedApp = app;
-	  modalVisible = true;
-	}
-  
-	// Fonction pour fermer le modal
-	function closeModal() {
-	  modalVisible = false;
-	}
 
 	// États du formulaire
 	let email = '';
@@ -146,25 +109,10 @@
 	
   </script>
   
-  <div class="container bg-red-100">
-	<h1>Catalogue d'Applications</h1>
-	
-	<div class="app-grid">
-	  {#each applications as app}
-		<div class="app-card" on:click={() => openModal(app)}>
-		  <img class="app-image" src={app.image} alt={app.nom} />
-		  <div class="app-info">
-			<div class="app-name">{app.nom}</div>
-			<div class="app-description">{app.description}</div>
-		  </div>
-		</div>
-	  {/each}
-	</div>
-  </div>
   <p>*****************************</p>
   <div class="container bg-red-100">
 	<h1>Catalogue d'Applications</h1>
-  	<AppList {apps} />
+  	<AppList {apps} on:select={(e) => openModal(e.detail)} />
   </div>
   <p>*****************************</p>
   
@@ -173,7 +121,7 @@
 	  <div class="modal">
 		<div class="modal-content">
 		  <div class="modal-header">
-			<div class="modal-title">Login for {selectedApp.nom}</div>
+			<div class="modal-title">Login for {selectedApp}</div>
 			<button class="close-button" on:click={closeModal}>&times;</button>
 		  </div>
 		  <div class="logo-container">
