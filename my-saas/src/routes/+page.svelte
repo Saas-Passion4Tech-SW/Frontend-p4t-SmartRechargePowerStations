@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
+	import AppList from './components/AppList.svelte';
   
 	// Liste des applications
 	const applications = [
@@ -34,6 +35,25 @@
 		image: "/api/placeholder/200/200",
 		details: "FitTracker enregistre vos activités sportives, votre alimentation et votre sommeil pour vous aider à atteindre vos objectifs de santé. Visualisez vos progrès et recevez des conseils personnalisés."
 	  }
+	];
+
+	// Exemple de liste d'applications
+	let apps = [
+		{
+		title: 'App 1',
+		description: 'Une application géniale pour gérer vos tâches.',
+		image: 'https://via.placeholder.com/400x200',
+		},
+		{
+		title: 'App 2',
+		description: 'Une autre application pour suivre vos finances.',
+		image: 'https://via.placeholder.com/400x200',
+		},
+		{
+		title: 'App 3',
+		description: 'Application de suivi de santé et de bien-être.',
+		image: 'https://via.placeholder.com/400x200',
+		},
 	];
 	
 	//const currentUrl = window.location.href;
@@ -141,6 +161,12 @@
 	  {/each}
 	</div>
   </div>
+  <p>*****************************</p>
+  <div class="container bg-red-100">
+	<h1>Catalogue d'Applications</h1>
+  	<AppList {apps} />
+  </div>
+  <p>*****************************</p>
   
   {#if modalVisible && selectedApp}
 	<div class="modal-backdrop">
