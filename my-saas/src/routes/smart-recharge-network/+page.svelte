@@ -131,48 +131,8 @@
 {:else}
     <div class="container bg-red-100">
         <h1>Catalogue d'Applications</h1>
-        
-        <div class="app-grid">
-            {#each tabs as tab}
-                <div class="app-card rounded shadow cursor-pointer" on:click={() => showDetails(tab)}>
-					<img class="app-image" src="" alt="" />
-					<div class="app-info">
-						<div class="app-name">{tab}</div>
-						<div class="app-description">here the description</div>
-					</div>
-                </div>
-            {/each}
-        </div>
+        <TabsFetch nets={$all_datas}/>
     </div>
-    <br />
-
-    <!-- Conteneur affiché après clic -->
-	{#if showDetailsSection}
-		<StationGrid stations={filteredData} net_name={selectedAppName}/>
-		<button class="mt-4 bg-red-500 text-white px-4 py-2 rounded" on:click={closeContainer}>
-			Fermer
-		</button>
-	{/if}
-	<p>****************************</p>
-	<button class="mt-4 bg-green-500 text-white px-4 py-2 rounded" on:click={set_stations_for_maps}>
-		Fermer
-	</button>
-	<TabsFetch nets={$all_datas}/>
-	<p>****************************</p>
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-		{#each stations as station}
-			<ChargingStationCard
-			location={station.location}
-			address={station.address}
-			online={station.online}
-			total={station.total}
-			active={station.active}
-			maintenance={station.maintenance}
-			fault={station.fault}
-			link={station.link}
-			/>
-		{/each}
-	</div>
 {/if}
 <style>
 	.container {
