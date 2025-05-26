@@ -1,15 +1,17 @@
 <script>
-	// @ts-ignore
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import StationGrid from '../components/StationGrid.svelte';
 	import TabsFetch from '../components/TabsFetch.svelte';
+	import ChargingStationCard from '../components/ChargingStationCard.svelte';
 	import { goto } from '$app/navigation';
+	import { get } from 'svelte/store';
 	
-	import { Networks, all_datas, stations_for_maps } from '../../variable-store';
+	import { Networks, all_datas, stations_for_maps } from '../../variable-store.js';
 	let networks = [];
 	const datas = [];
 
+	let isLoading = true;
 	onMount(async () => {
 		const token = localStorage.getItem('access_token');
 		try {
@@ -18,33 +20,31 @@
 					Authorization: `Bearer ${token}`
 				}
 			});
-
-			//datas = response.data;
-			const tempNetworks = [];
-
-			//const result = await response.json();
-			all_datas.set(response.data.data); // accessible partout dans le script après
-			stations_for_maps.set(response.data.data);
-			console.log('Données récupérées :', response.data);
-
-			for (let key in response.data.data) {
-				tempNetworks.push({
-					nom: key,
-					description: "Éditeur de photos professionnel avec de nombreux filtres et outils",
-					image: "/api/placeholder/200/200",
-					details: `${key} est une application complète d'édition d'images...`
-				});
+			if (response.data) {
+				console.log("Réponse API complète :", response.data);
+				console.log("Contenu de response.data.data :", response.data.data);
+				all_datas.set(response.data.data);
+				isLoading = false;
+			} else {
+				console.warn('response.data est null ou vide');
 			}
-			Networks.set(tempNetworks); // 👈 Important : mise à jour du store
 		} catch (err) {
 			console.error("Erreur d'authentification", err);
+		} finally {
+			//isLoading = false;
 		}
 	});
 
-	console.log("==============");
-	console.log($Networks);
+	console.log("=======444=======");
 	console.log($all_datas);
-	console.log("==============");
+	console.log("======444========");
+
+	const tabs = Object.keys($all_datas);
+
+	console.log("=======555=======");
+	console.log(tabs);
+	console.log($all_datas[tabs[0]]);
+	console.log("======555========");
 
     let selectedApp = null;
 
@@ -72,19 +72,73 @@
 		goto('http://89.117.63.24:2901/map');
 	}
 
-
+	const stations = [
+		{
+			location: "Albairate",
+			address: "Via Marcatutto, 5/A",
+			online: true,
+			total: 4,
+			active: 4,
+			maintenance: 0,
+			fault: 0,
+			link: "https://github.com/heroui-inc/heroui"
+		},
+		{
+			location: "Milano",
+			address: "Corso Buenos Aires, 15",
+			online: false,
+			total: 6,
+			active: 3,
+			maintenance: 2,
+			fault: 1,
+			link: "https://example.com/milano"
+		},
+		{
+			location: "Torino",
+			address: "Via Roma, 101",
+			online: true,
+			total: 8,
+			active: 8,
+			maintenance: 0,
+			fault: 0,
+			link: "https://example.com/torino"
+		},
+		{
+			location: "Albairate",
+			address: "Via Marcatutto, 5/A",
+			online: true,
+			total: 4,
+			active: 4,
+			maintenance: 0,
+			fault: 0,
+			link: "https://github.com/heroui-inc/heroui"
+		},
+		{
+			location: "Milano",
+			address: "Corso Buenos Aires, 15",
+			online: false,
+			total: 6,
+			active: 3,
+			maintenance: 2,
+			fault: 1,
+			link: "https://example.com/milano"
+		},
+	];
 </script>
-  
+{#if isLoading}
+	<!-- Affiche un loader ou un message -->
+	<p>Chargement des données...</p>
+{:else}
     <div class="container bg-red-100">
         <h1>Catalogue d'Applications</h1>
         
         <div class="app-grid">
-            {#each $Networks as app}
-                <div class="app-card rounded shadow cursor-pointer" on:click={() => showDetails(app.nom)}>
-					<img class="app-image" src={app.image} alt={app.nom} />
+            {#each tabs as tab}
+                <div class="app-card rounded shadow cursor-pointer" on:click={() => showDetails(tab)}>
+					<img class="app-image" src="" alt="" />
 					<div class="app-info">
-						<div class="app-name">{app.nom}</div>
-						<div class="app-description">{app.description}</div>
+						<div class="app-name">{tab}</div>
+						<div class="app-description">here the description</div>
 					</div>
                 </div>
             {/each}
@@ -103,11 +157,24 @@
 	<button class="mt-4 bg-green-500 text-white px-4 py-2 rounded" on:click={set_stations_for_maps}>
 		Fermer
 	</button>
-	<TabsFetch />
-
-  
-
-  <style>
+	<TabsFetch nets={$all_datas}/>
+	<p>****************************</p>
+	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+		{#each stations as station}
+			<ChargingStationCard
+			location={station.location}
+			address={station.address}
+			online={station.online}
+			total={station.total}
+			active={station.active}
+			maintenance={station.maintenance}
+			fault={station.fault}
+			link={station.link}
+			/>
+		{/each}
+	</div>
+{/if}
+<style>
 	.container {
 	  max-width: 1200px;
 	  margin: 0 auto;
@@ -163,4 +230,4 @@
 	  color: #666;
 	  line-height: 1.4;
 	}
-  </style>
+</style>

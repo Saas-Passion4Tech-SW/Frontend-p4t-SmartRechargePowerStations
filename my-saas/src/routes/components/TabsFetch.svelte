@@ -1,28 +1,41 @@
 <script>
   import { onMount } from 'svelte';
+  import StationGrid1 from './StationGrid1.svelte';
+  export let nets;
 
-  let activeTab = 'users';
   let data = [];
   let loading = false;
   let error = null;
 
-  const tabs = ['users', 'products', 'orders'];
+  const datax = {
+		fruits: ["pomme", "banane", "orange"],
+		legumes: ["carotte", "brocoli", "tomate"],
+		boissons: ["eau", "jus", "lait"]
+	};
+
+	// Liste complète des onglets avec "home" en premier
+	const tabs = ["home", ...Object.keys(nets)];
+
+	let activeTab = "home";
+  
+  console.log("++++++++0000++++");
+  console.log(nets);
+  console.log("/////////////");
 
   // Fonction pour charger les données de l'API
   async function fetchData(table) {
-    activeTab = table;
-    loading = true;
-    error = null;
-    data = [];
+    
+    activeTab=table;
 
-    try {
-      const res = await fetch(`https://api.example.com/${table}`);
-      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
-      data = await res.json();
-    } catch (err) {
-      error = err.message;
-    } finally {
-      loading = false;
+    if (table==tabs[0]) {
+      data=[]; 
+    }
+    else {
+      console.log("999999999");
+      console.log(table);
+      console.log(nets[table]);
+      data=nets[table];
+      console.log("888888888");
     }
   }
 
@@ -53,7 +66,7 @@
 
   .active {
     border-bottom: 2px solid #007BFF;
-    color: #007BFF;
+    color:rgb(44, 68, 202);
   }
 
   table {
@@ -78,30 +91,13 @@
     </button>
   {/each}
 </div>
-
+<br />
 {#if loading}
   <p>Chargement...</p>
 {:else if error}
   <p style="color: red;">Erreur : {error}</p>
 {:else if data.length > 0}
-  <table>
-    <thead>
-      <tr>
-        {#each Object.keys(data[0]) as key}
-          <th>{key}</th>
-        {/each}
-      </tr>
-    </thead>
-    <tbody>
-      {#each data as row}
-        <tr>
-          {#each Object.values(row) as value}
-            <td>{value}</td>
-          {/each}
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+  <StationGrid1 stations={data}/>
 {:else}
   <p>Aucune donnée à afficher.</p>
 {/if}
