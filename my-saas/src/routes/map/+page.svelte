@@ -25,6 +25,14 @@
     },
     freeParking: false
   };
+  let showSidebar = false;
+
+  let isMobile = false;
+
+  onMount(() => {
+    isMobile = window.innerWidth <= 768;
+  });
+
 
   export async function fetchAllStations() {
     // Simuler un délai d'API
@@ -235,8 +243,14 @@
   <title>Carte des bornes de recharge</title>
 </svelte:head>
 
+{#if isMobile}
+  <button class="toggle-sidebar-btn" on:click={() => showSidebar = !showSidebar}>
+    {showSidebar ? 'Cacher les filtres' : 'Afficher les filtres'}
+  </button>
+{/if}
+
 <div class="map-page">
-  <div class="sidebar">
+  <div class="sidebar" class:hidden={!showSidebar && isMobile}>
     <h2>Filtres</h2>
 
     {#if isLoading}
@@ -504,4 +518,22 @@
     cursor: pointer;
     width: 100%;
   }
+
+.hidden {
+  display: none !important;
+}
+
+.toggle-sidebar-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+
 </style>
