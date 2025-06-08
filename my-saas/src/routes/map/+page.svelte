@@ -1,16 +1,12 @@
 <!-- map/+page.svelte -->
 <script>
   import { onMount } from 'svelte';
-  import { fetchAllStations } from '$lib/services/stationService1';
+  //import { fetchAllStations } from '$lib/services/stationService1';
   //import StationMarker from '$lib/components/StationMarker.svelte';
   import FilterPanel from '$lib/components/FilterPanel.svelte';
   import { goto } from '$app/navigation';
   import { userPosition } from '$lib/stores/locationStore';
   import { stations_for_maps } from '../../variable-store';
-
-  console.log("121jnjn99999");
-  console.log($stations_for_maps);
-  console.log("---------------");
 
   let mapContainer;
   let map;
@@ -30,6 +26,40 @@
     freeParking: false
   };
 
+  export async function fetchAllStations() {
+    // Simuler un délai d'API
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Récupérer le token depuis le localStorage (ou un store)
+    //const token = localStorage.getItem('token'); // assure-toi qu’il est bien stocké sous ce nom
+    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMDQzMTE0LCJpYXQiOjE3NDkxNTUxMTQsImp0aSI6ImNjZjcwOTM4ZmE4NzQyZDRiMmU1MDY4ZmQ4NjlhNTUzIiwidXNlcl9pZCI6M30.n2fOF8aBkPnBPch7VYvMZIMbrPt0t8Z0yG7VIC-JXgQ"
+
+    if (!token) {
+      throw new Error('Aucun token d’authentification trouvé.');
+    }
+
+    try {
+      const response = await fetch('http://89.117.63.24:8005/api/smartrecharge/stations/reviews/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+
+    } catch (err) {
+      console.error('Erreur lors du fetch des stations :', err);
+      throw err;
+    }
+  }
+
+
   onMount(async () => {
     if (typeof window !== 'undefined') {
       // Importation dynamique de Leaflet (évite les erreurs SSR)
@@ -44,9 +74,14 @@
       try {
         // Récupérer les stations
         stations = await fetchAllStations();
+        console.log("----------------");
+        console.log(stations);
+        console.log("----------------");
 
         // Initialiser la carte
-        map = L.map(mapContainer).setView([3.848, 11.502], 6);
+        //map = L.map(mapContainer).setView([3.848, 11.502], 6);
+        map = L.map(mapContainer).setView([5.9631, 10.1591], 6);
+
 
         // Ajout des tuiles OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -100,70 +135,29 @@
     });
 
     // Filtrer les stations selon les critères
-    const filteredStations = stations.filter(station => {
-      // Vérifier la disponibilité
-      if (filters.onlyAvailable && !station.isAvailable) {
-        return false;
-      }
-
-      // Vérifier la puissance minimale
-      const hasMinPower = station.connectors.some(c => c.power >= filters.minPower);
-      if (!hasMinPower) {
-        return false;
-      }
-
-      // Vérifier les types de connecteurs
-      const hasMatchingConnector = station.connectors.some(c => {
-        if (c.type.toLowerCase().includes('type 2') && filters.connectorTypes.type2) return true;
-        if (c.type.toLowerCase().includes('chademo') && filters.connectorTypes.chademo) return true;
-        if (c.type.toLowerCase().includes('ccs') && filters.connectorTypes.ccs) return true;
-        if (c.type.toLowerCase().includes('tesla') && filters.connectorTypes.tesla) return true;
-        return false;
-      });
-
-      if (!hasMatchingConnector) {
-        return false;
-      }
-
-      // Vérifier le parking gratuit
-      if (filters.freeParking && station.hasParkingFee) {
-        return false;
-      }
-
-      // Vérifier la distance si une position utilisateur est disponible
-      if ($userPosition && searchRadius > 0) {
-        const distance = calculateDistance(
-          $userPosition.lat,
-          $userPosition.lng,
-          station.coordinates.lat,
-          station.coordinates.lng
-        );
-
-        if (distance > searchRadius) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
+    const filteredStations = stations;
+    
     // Ajouter les marqueurs pour les stations filtrées
     filteredStations.forEach(station => {
       const L = window.L; // Utiliser L depuis le scope global
+
+      console.log("--------***station***--------");
+      console.log(station);
+      console.log("--------***station end***--------");
 
       // Créer l'élément du marqueur
       const el = document.createElement('div');
       el.className = 'station-marker';
       el.innerHTML = `
-        <div class="marker ${station.isAvailable ? 'available' : 'busy'}"></div>
+        <div class="marker ${station.isAccessible ? 'available' : 'busy'}"></div>
       `;
 
       // Créer le marqueur
-      const marker = L.marker([station.coordinates.lat, station.coordinates.lng], {
+      const marker = L.marker([station.latitude, station.longitude], {
         icon: L.divIcon({
           className: 'station-marker-container',
           html: el.outerHTML,
-          iconSize: [30, 30]
+          iconSize: [1, 1]
         })
       }).addTo(map);
 
@@ -172,16 +166,10 @@
         <div class="station-popup">
           <h3>${station.name}</h3>
           <p>${station.address}</p>
-          <p class="status ${station.isAvailable ? 'available' : 'busy'}">
-            ${station.isAvailable ? 'Disponible' : 'Occupée'}
+          <p class="status ${station.isAccessible ? 'available' : 'busy'}">
+            ${station.isAccessible ? 'Disponible' : 'Occupée'}
           </p>
-          <div class="connectors">
-            ${station.connectors.map(c => `
-              <span class="connector ${c.isAvailable ? 'available' : 'busy'}">
-                ${c.type} - ${c.power}kW
-              </span>
-            `).join('')}
-          </div>
+          
           <button class="view-details-btn" onclick="window.location.href='/stations/${station.id}'">
             Voir détails
           </button>
@@ -190,13 +178,13 @@
 
       // Événement de clic sur le marqueur
       marker.on('click', () => {
-        map.setView([station.coordinates.lat, station.coordinates.lng], 14);
+        //map.setView([station.latitude, station.longitude], 14);
       });
     });
   }
 
   // Calculer la distance en km entre deux points géographiques
-  function calculateDistance(lat1, lon1, lat2, lon2) {
+  /*function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Rayon de la Terre en km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -206,7 +194,7 @@
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
-  }
+  }*/
 
   // Réagir aux changements de filtres
   $: {
