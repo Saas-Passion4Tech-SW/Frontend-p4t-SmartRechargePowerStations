@@ -1,7 +1,8 @@
 <script>
+	import { onMount } from 'svelte';
 	let isMenuOpen = false;
 
-	const links = [
+	let links = [
 		{ name: 'Accueil', href: '/' },
 		{ name: 'Produits', href: '/produits' },
 		{ name: 'À propos', href: '/a-propos' },

@@ -45,6 +45,18 @@
 		console.log("URL actuelle :", currentUrl);
 	});
 
+	let tokenExists = false;
+
+	onMount(() => {
+		const token = localStorage.getItem('access_token');
+		if (token) {
+			goto('/smart-recharge-network');
+			//tokenExists = true;
+		} else {
+			tokenExists = false;
+		}
+	});
+
 	// États du formulaire
 	let email = '';
 	let username = '';
@@ -94,7 +106,8 @@
 				goto(currentUrl+'smart-recharge-network');
 			} else if (response.data.role == 'Station manager') {
 				//window.location.href = currentUrl+'smart-recharge-station';
-				goto(currentUrl+'smart-recharge-station');
+				goto(currentUrl+'smart-recharge-network');
+				//goto(currentUrl+'smart-recharge-station');
 			} else {
 				//window.location.href = currentUrl+'smart-recharge-guest';
 				goto(currentUrl+'smart-recharge-guest');
@@ -108,6 +121,13 @@
 
 	
   </script>
+
+  {#if tokenExists}
+	<!-- Ton contenu ici -->
+	<p>Bienvenue ! Token détecté.</p>
+  {:else}
+	<p>Bienvenue ! Token non détecté.</p>
+  {/if}
   
   <p>*****************************</p>
   <div class="container bg-red-100">
