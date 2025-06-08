@@ -3,6 +3,7 @@
 	import axios from 'axios';
 	import StationGrid from '../components/StationGrid.svelte';
 	import TabsFetch from '../components/TabsFetch.svelte';
+	import ChargingStationCard2 from '../components/ChargingStationCard2.svelte';
 	import ChargingStationCard from '../components/ChargingStationCard.svelte';
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
@@ -12,6 +13,9 @@
 	const datas = [];
 
 	let isLoading = true;
+	let isNM = false;
+	let isSM = false;
+
 	onMount(async () => {
 		const token = localStorage.getItem('access_token');
 		try {
@@ -22,9 +26,34 @@
 			});
 			if (response.data) {
 				console.log("Réponse API complète :", response.data);
+				console.log("Réponse role :", response.data.role);
 				console.log("Contenu de response.data.data :", response.data.data);
-				all_datas.set(response.data.data);
-				isLoading = false;
+				if (response.data.role == 'Admin') {
+					all_datas.set(response.data.data);
+					isLoading = false;
+					isNM = true;
+					console.log("444444");
+					console.log(response.data.role + "-" +response.data.data);
+				}
+				if (response.data.role == 'Network manager') {
+					all_datas.set(response.data.data);
+					isLoading = false;
+					isNM = true;
+					console.log("444444");
+					console.log(response.data.role + "-" +response.data.data);
+				}
+				if (response.data.role == 'Station manager') {
+					all_datas.set(response.data.data);
+					isLoading = false;
+					isSM = true;
+					console.log("33333");
+					console.log(response.data.role);
+					console.log(response.data.data);
+				}
+				console.log("isNM");
+				console.log(isNM);
+				console.log("isNM");
+				console.log(isSM);
 			} else {
 				console.warn('response.data est null ou vide');
 			}
@@ -124,6 +153,11 @@
 			link: "https://example.com/milano"
 		},
 	];
+
+	function logout() {
+		localStorage.removeItem('access_token');
+		goto('/'); // rediriger après déconnexion
+	}
 </script>
 {#if isLoading}
 	<!-- Affiche un loader ou un message -->
@@ -131,8 +165,17 @@
 {:else}
     <div class="container bg-red-100">
         <h1>Catalogue d'Applications</h1>
-        <TabsFetch nets={$all_datas}/>
+		{#if !isNM && isSM}
+			<p>isNM: {isNM}, isSM: {isSM} =>NMS</p>
+			<ChargingStationCard2 stations={$all_datas}/>
+		{:else if isNM && !isSM}
+			<p>isNM: {isNM}, isSM: {isSM} => SM</p>
+			<TabsFetch nets={$all_datas}/>
+		{:else}
+			<p>Autre combinaison, le user est un guest</p>
+		{/if}
     </div>
+	<button on:click={logout}>Se déconnecter</button>
 {/if}
 <style>
 	.container {
