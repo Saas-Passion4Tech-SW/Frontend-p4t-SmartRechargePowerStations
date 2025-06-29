@@ -82,9 +82,9 @@
       try {
         // Récupérer les stations
         stations = await fetchAllStations();
-        console.log("----------------");
+        console.log("---------AAAAAAA-------");
         console.log(stations);
-        console.log("----------------");
+        console.log("--------SSSSSSSSSSS--------");
 
         // Initialiser la carte
         //map = L.map(mapContainer).setView([3.848, 11.502], 6);
