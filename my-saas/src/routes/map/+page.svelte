@@ -1,7 +1,7 @@
 <!-- map/+page.svelte -->
 <script>
   import { onMount } from 'svelte';
-  //import { fetchAllStations } from '$lib/services/stationService1';
+  import { fetchAllStations } from '$lib/services/stationService1';
   //import StationMarker from '$lib/components/StationMarker.svelte';
   import FilterPanel from '$lib/components/FilterPanel.svelte';
   import { goto } from '$app/navigation';
@@ -34,7 +34,7 @@
   });
 
 
-  export async function fetchAllStations() {
+  /*export async function fetchAllStations() {
     // Simuler un délai d'API
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -47,7 +47,7 @@
     }
 
     try {
-      const response = await fetch('http://89.117.63.24:8005/api/smartrecharge/stations/reviews/', {
+      const response = await fetch('http://89.117.63.24:8095/api/smartrecharge/stations/reviews/', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -65,7 +65,7 @@
       console.error('Erreur lors du fetch des stations :', err);
       throw err;
     }
-  }
+  }*/
 
 
   onMount(async () => {
@@ -89,6 +89,9 @@
         // Initialiser la carte
         //map = L.map(mapContainer).setView([3.848, 11.502], 6);
         map = L.map(mapContainer).setView([5.9631, 10.1591], 6);
+
+        // Initialiser la carte (temporairement au 0,0)
+        //const map = L.map('map').setView([0, 0], 6);
 
 
         // Ajout des tuiles OpenStreetMap
@@ -132,7 +135,7 @@
   });
 
   // Fonction pour ajouter les marqueurs de stations sur la carte
-  function addStationMarkers() {
+  function addStationMarkers1() {
     if (!map) return;
 
     // Supprimer les marqueurs existants si nécessaire
@@ -161,7 +164,8 @@
       `;
 
       // Créer le marqueur
-      const marker = L.marker([station.latitude, station.longitude], {
+      //const marker = L.marker([station.latitude, station.longitude], {
+      const marker = L.marker([station.coordinates.lat, station.coordinates.lng], {
         icon: L.divIcon({
           className: 'station-marker-container',
           html: el.outerHTML,
@@ -186,10 +190,135 @@
 
       // Événement de clic sur le marqueur
       marker.on('click', () => {
-        //map.setView([station.latitude, station.longitude], 14);
+        map.setView([station.latitude, station.longitude], 14);
       });
     });
   }
+
+  let stationLayer; // à déclarer en haut du fichier (en dehors de la fonction)
+
+  function addStationMarkers2() {
+    if (!map) return;
+
+    // Supprimer l'ancien groupe si existe
+    if (stationLayer) {
+      map.removeLayer(stationLayer);
+    }
+
+    // Nouveau groupe pour stocker les marqueurs
+    stationLayer = L.layerGroup();
+
+    // Filtrer les stations selon les critères (si besoin)
+    const filteredStations = stations;
+
+    // Ajouter les marqueurs pour les stations filtrées
+    filteredStations.forEach(station => {
+      const L = window.L;
+
+      console.log("--------***station***--------");
+      console.log(station);
+      console.log("--------***station end***--------");
+
+      // Créer l'élément du marqueur
+      const el = document.createElement('div');
+      el.className = 'station-marker';
+      el.innerHTML = `
+        <div class="marker ${station.isAccessible ? 'available' : 'busy'}"></div>
+      `;
+
+      // Créer le marqueur
+      const marker = L.marker([station.coordinates.lat, station.coordinates.lng], {
+        icon: L.divIcon({
+          className: 'station-marker-container',
+          html: el.outerHTML,
+          iconSize: [1, 1]
+        })
+      });
+
+      // Ajouter un popup au marqueur
+      marker.bindPopup(`
+        <div class="station-popup">
+          <h3>${station.name}</h3>
+          <p>${station.address}</p>
+          <p class="status ${station.isAccessible ? 'available' : 'busy'}">
+            ${station.isAccessible ? 'Disponible' : 'Occupée'}
+          </p>
+          <button class="view-details-btn" onclick="window.location.href='/stations/${station.id}'">
+            Voir détails
+          </button>
+        </div>
+      `);
+
+      // Événement de clic sur le marqueur
+      marker.on('click', () => {
+        map.setView([station.coordinates.lat, station.coordinates.lng], 14);
+      });
+
+      // Ajouter ce marqueur au groupe
+      marker.addTo(stationLayer);
+    });
+
+    // Ajouter le groupe sur la carte
+    stationLayer.addTo(map);
+  }
+
+  function addStationMarkers() {
+    if (!map) return;
+
+    // Supprimer les marqueurs existants si nécessaire
+    map.eachLayer(layer => {
+      if (layer._icon && layer._icon.className.includes('station-marker')) {
+        map.removeLayer(layer);
+      }
+    });
+
+    // Filtrer les stations selon les critères
+    const filteredStations = stations;
+
+    // Stocker les coordonnées des marqueurs
+    const bounds = [];
+
+    filteredStations.forEach(station => {
+      const L = window.L;
+
+      const el = document.createElement('div');
+      el.className = 'station-marker';
+      el.innerHTML = `
+        <div class="marker ${station.isAccessible ? 'available' : 'busy'}"></div>
+      `;
+
+      const marker = L.marker([station.coordinates.lat, station.coordinates.lng], {
+        icon: L.divIcon({
+          className: 'station-marker-container',
+          html: el.outerHTML,
+          iconSize: [12, 12], // taille réduite
+          iconAnchor: [6, 6]
+        })
+      }).addTo(map);
+
+      marker.bindPopup(`
+        <div class="station-popup">
+          <h3>${station.name}</h3>
+          <p>${station.address}</p>
+          <p class="status ${station.isAccessible ? 'available' : 'busy'}">
+            ${station.isAccessible ? 'Disponible' : 'Occupée'}
+          </p>
+          <button class="view-details-btn" onclick="window.location.href='/stations/${station.id}'">
+            Voir détails
+          </button>
+        </div>
+      `);
+
+      bounds.push([station.coordinates.lat, station.coordinates.lng]);
+    });
+
+    // ✅ Ajuster la vue automatiquement pour englober toutes les stations
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [50, 50] }); // padding pour marges
+    }
+  }
+
+
 
   // Calculer la distance en km entre deux points géographiques
   /*function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -437,13 +566,22 @@
     background: transparent;
   }
 
-  :global(.station-marker .marker) {
+  /*:global(.station-marker .marker) {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background: #e74c3c;
     border: 2px solid white;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  }*/
+
+  :global(.station-marker .marker) {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e74c3c;
+    border: 1px solid white;
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
   }
 
   :global(.station-marker .marker.available) {
